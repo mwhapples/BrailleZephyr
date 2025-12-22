@@ -117,8 +117,8 @@ public final class BZFile extends BZBase
 		}
 
 		FileDialog fileDialog = new FileDialog(parentShell, SWT.OPEN);
-		fileDialog.setFilterExtensions(new String[]{ "*.brf", "*.bzy", "*.brf;*.bzy", "*.*" });
-		fileDialog.setFilterNames(new String[]{ "Braille Ready Format File", "BrailleZephyr File", "Braille Files", "All Files" });
+		fileDialog.setFilterExtensions("*.brf", "*.bzy", "*.brf;*.bzy", "*.*");
+		fileDialog.setFilterNames("Braille Ready Format File", "BrailleZephyr File", "Braille Files", "All Files");
 		fileDialog.setFilterIndex(2);
 		String fileName = fileDialog.open();
 		if(fileName == null)
@@ -136,8 +136,8 @@ public final class BZFile extends BZBase
 		{
 			FileDialog fileDialog = new FileDialog(parentShell, SWT.SAVE);
 			fileDialog.setFileName(this.fileName);
-			fileDialog.setFilterExtensions(new String[]{ "*.brf", "*.bzy", "*.brf;*.bzy", "*.*" });
-			fileDialog.setFilterNames(new String[]{ "Braille Ready Format File", "BrailleZephyr File", "Braille Files", "All Files" });
+			fileDialog.setFilterExtensions("*.brf", "*.bzy", "*.brf;*.bzy", "*.*");
+			fileDialog.setFilterNames("Braille Ready Format File", "BrailleZephyr File", "Braille Files", "All Files");
 			fileDialog.setFilterIndex(2);
 			fileName = fileDialog.open();
 			if(fileName == null)
