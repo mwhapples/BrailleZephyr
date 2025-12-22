@@ -73,14 +73,12 @@ public final class BZFile extends BZBase
 
 	boolean openFile(String fileName)
 	{
-		try
+		try(FileReader fileReader = new FileReader(fileName))
 		{
-			FileReader fileReader = new FileReader(fileName);
 			if(fileName.endsWith("bzy"))
 				bzStyledText.readBZY(fileReader);
 			else
 				bzStyledText.readBRF(fileReader);
-			fileReader.close();
 			parentShell.setText(new File(fileName).getName() + " - BrailleZephyr");
 			this.fileName = fileName;
 			return true;
