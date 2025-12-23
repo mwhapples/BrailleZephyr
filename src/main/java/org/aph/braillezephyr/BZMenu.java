@@ -41,6 +41,7 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 
 /**
@@ -213,7 +214,7 @@ public final class BZMenu extends BZBase {
         public void widgetSelected(SelectionEvent event) {
             MenuItem menuItem = (MenuItem) event.widget;
             String fileName = menuItem.getText();
-            if (bzFile.openFile(fileName)) {
+            if (bzFile.openFile(Path.of(fileName))) {
                 new OpenRecentHandler().addMenuItemAt(recentFilesMenu, fileName, 0);
                 bzSettings.addRecentFile(fileName);
             } else

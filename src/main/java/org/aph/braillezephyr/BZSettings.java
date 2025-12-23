@@ -144,7 +144,7 @@ public final class BZSettings extends BZBase {
 
         recentFiles.add(0, fileName);
         if (recentFiles.size() > 6) {
-			recentFiles.subList(6, recentFiles.size()).clear();
+            recentFiles.subList(6, recentFiles.size()).clear();
         }
     }
 
@@ -292,7 +292,7 @@ public final class BZSettings extends BZBase {
             return false;
         }
 
-        try(BufferedReader reader = new BufferedReader(new FileReader(file))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
 
             String line;
             int lineNumber = 1;
@@ -324,17 +324,20 @@ public final class BZSettings extends BZBase {
         writer.println("charsPerLine " + bzStyledText.getCharsPerLine());
         writer.println("lineMarginBell " + bzStyledText.getLineMarginBell());
         fileName = bzStyledText.getLineMarginFileName();
-        if (fileName != null)
+        if (fileName != null) {
             writer.println("lineMarginFileName " + fileName);
+        }
         fileName = bzStyledText.getLineEndFileName();
-        if (fileName != null)
+        if (fileName != null) {
             writer.println("lineEndFileName " + fileName);
+        }
 
         writer.println("linesPerPage " + bzStyledText.getLinesPerPage());
         writer.println("pageMarginBell " + bzStyledText.getPageMarginBell());
         fileName = bzStyledText.getPageMarginFileName();
-        if (fileName != null)
+        if (fileName != null) {
             writer.println("pageMarginFileName " + fileName);
+        }
 
         writer.println();
 
@@ -357,8 +360,9 @@ public final class BZSettings extends BZBase {
         writer.println();
 
         writer.println("recentFilesMax " + recentFilesMax);
-        for (String recentFile : recentFiles)
+        for (String recentFile : recentFiles) {
             writer.println("recentFile " + recentFile);
+        }
 
         writer.println();
     }

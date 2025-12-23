@@ -25,6 +25,8 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 
+import java.nio.file.Path;
+
 /**
  * <p>
  * Contains the main method.
@@ -62,8 +64,9 @@ public final class Main {
         new BZMenu(bzStyledText, bzFile, bzSettings);
 
         //   assume any argument is a file to open
-        if (args.length > 0)
-            bzFile.openFile(args[0]);
+        if (args.length > 0) {
+            bzFile.openFile(Path.of(args[0]).normalize());
+        }
 
         shell.open();
         while (!shell.isDisposed()) {
