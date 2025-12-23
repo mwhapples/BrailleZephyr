@@ -40,11 +40,11 @@ public final class Main {
     private final BZFile bzFile;
     private final BZSettings bzSettings;
 
-    public static void main(String[] args) {
+    public static void main(String... args) {
         new Main(args);
     }
 
-    public Main(String[] args) {
+    public Main(String... args) {
         //   must be before display is created (on Macs at least)
         Display.setAppName("BrailleZephyr");
 
