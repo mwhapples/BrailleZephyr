@@ -370,16 +370,9 @@ public class BZStyledText {
             IOException,
             UnsupportedAudioFileException,
             LineUnavailableException {
-        InputStream inputStream = new BufferedInputStream(Files.newInputStream(Paths.get(fileName)));
-        AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(inputStream);
-        DataLine.Info dataLineInfo = new DataLine.Info(Clip.class, audioInputStream.getFormat());
         Clip clip = lineMarginClip;
-        try {
-            lineMarginClip = (Clip) AudioSystem.getLine(dataLineInfo);
-            lineMarginClip.open(audioInputStream);
-        } catch (IOException | LineUnavailableException exception) {
-            lineMarginClip = clip;
-            throw exception;
+        try(InputStream inputStream = Files.newInputStream(Paths.get(fileName))) {
+            lineMarginClip = loadClip(inputStream);
         }
         lineMarginFileName = fileName;
         if (clip != null) {
@@ -447,16 +440,9 @@ public class BZStyledText {
             IOException,
             UnsupportedAudioFileException,
             LineUnavailableException {
-        InputStream inputStream = new BufferedInputStream(Files.newInputStream(Paths.get(fileName)));
-        AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(inputStream);
-        DataLine.Info dataLineInfo = new DataLine.Info(Clip.class, audioInputStream.getFormat());
         Clip clip = pageMarginClip;
-        try {
-            pageMarginClip = (Clip) AudioSystem.getLine(dataLineInfo);
-            pageMarginClip.open(audioInputStream);
-        } catch (IOException | LineUnavailableException exception) {
-            pageMarginClip = clip;
-            throw exception;
+        try(InputStream inputStream = Files.newInputStream(Paths.get(fileName))) {
+            pageMarginClip = loadClip(inputStream);
         }
         pageMarginFileName = fileName;
         if (clip != null) {
@@ -481,16 +467,9 @@ public class BZStyledText {
             IOException,
             UnsupportedAudioFileException,
             LineUnavailableException {
-        InputStream inputStream = new BufferedInputStream(Files.newInputStream(Paths.get(fileName)));
-        AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(inputStream);
-        DataLine.Info dataLineInfo = new DataLine.Info(Clip.class, audioInputStream.getFormat());
         Clip clip = lineEndClip;
-        try {
-            lineEndClip = (Clip) AudioSystem.getLine(dataLineInfo);
-            lineEndClip.open(audioInputStream);
-        } catch (IOException | LineUnavailableException exception) {
-            lineEndClip = clip;
-            throw exception;
+        try(InputStream inputStream = Files.newInputStream(Paths.get(fileName))) {
+            lineEndClip = loadClip(inputStream);
         }
         lineEndFileName = fileName;
         if (clip != null) {
