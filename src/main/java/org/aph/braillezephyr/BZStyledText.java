@@ -29,7 +29,7 @@ import org.eclipse.swt.widgets.Shell;
 import javax.sound.sampled.*;
 import java.io.*;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -371,7 +371,7 @@ public class BZStyledText {
             UnsupportedAudioFileException,
             LineUnavailableException {
         Clip clip = lineMarginClip;
-        try(InputStream inputStream = Files.newInputStream(Paths.get(fileName))) {
+        try(InputStream inputStream = Files.newInputStream(Path.of(fileName))) {
             lineMarginClip = loadClip(inputStream);
         }
         lineMarginFileName = fileName;
@@ -441,7 +441,7 @@ public class BZStyledText {
             UnsupportedAudioFileException,
             LineUnavailableException {
         Clip clip = pageMarginClip;
-        try(InputStream inputStream = Files.newInputStream(Paths.get(fileName))) {
+        try(InputStream inputStream = Files.newInputStream(Path.of(fileName))) {
             pageMarginClip = loadClip(inputStream);
         }
         pageMarginFileName = fileName;
@@ -468,7 +468,7 @@ public class BZStyledText {
             UnsupportedAudioFileException,
             LineUnavailableException {
         Clip clip = lineEndClip;
-        try(InputStream inputStream = Files.newInputStream(Paths.get(fileName))) {
+        try(InputStream inputStream = Files.newInputStream(Path.of(fileName))) {
             lineEndClip = loadClip(inputStream);
         }
         lineEndFileName = fileName;
