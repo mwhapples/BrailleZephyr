@@ -12,6 +12,7 @@
         <maven.compiler.source>25</maven.compiler.source>
         <maven.compiler.target>25</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <distDirectory>${project.build.directory}</distDirectory>
         <swt.version>3.132.0</swt.version>
     </properties>
     <dependencyManagement>
@@ -19,6 +20,36 @@
             <dependency>
                 <groupId>org.eclipse.platform</groupId>
                 <artifactId>org.eclipse.swt</artifactId>
+                <version>${swt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.platform</groupId>
+                <artifactId>org.eclipse.swt.win32.win32.x86_64</artifactId>
+                <version>${swt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.platform</groupId>
+                <artifactId>org.eclipse.swt.win32.win32.aarch64</artifactId>
+                <version>${swt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.platform</groupId>
+                <artifactId>org.eclipse.swt.gtk.linux.x86_64</artifactId>
+                <version>${swt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.platform</groupId>
+                <artifactId>org.eclipse.swt.gtk.linux.aarch64</artifactId>
+                <version>${swt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.platform</groupId>
+                <artifactId>org.eclipse.swt.cocoa.macosx.x86_64</artifactId>
+                <version>${swt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.platform</groupId>
+                <artifactId>org.eclipse.swt.cocoa.macosx.aarch64</artifactId>
                 <version>${swt.version}</version>
             </dependency>
         </dependencies>
@@ -38,6 +69,11 @@
                     <version>3.5.0</version>
                 </plugin>
                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>3.9.0</version>
+                </plugin>
+                <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>exec-maven-plugin</artifactId>
                     <version>3.6.2</version>
@@ -49,6 +85,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
+                    <outputDirectory>${distDirectory}</outputDirectory>
                     <archive>
                         <manifest>
                             <mainClass>org.aph.braillezephyr.Main</mainClass>
@@ -111,6 +148,84 @@
                                 <argument>org.aph.braillezephyr.Main</argument>
                             </arguments>
                         </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>build-dist</id>
+            <properties>
+                <distDirectory>${project.build.directory}/dist</distDirectory>
+            </properties>
+            <build>
+                <defaultGoal>package</defaultGoal>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>copy-dependenecies-to-dist</id>
+                                <goals>
+                                    <goal>copy-dependencies</goal>
+                                </goals>
+                                <phase>package</phase>
+                                <configuration>
+                                    <outputDirectory>${distDirectory}/lib</outputDirectory>
+                                    <excludeArtifactIds>
+                                        org.eclipse.swt.win32.win32.x86_64,
+                                        org.eclipse.swt.win32.win32.aarch64,
+                                        org.eclipse.swt.gtk.linux.x86_64,
+                                        org.eclipse.swt.gtk.linux.aarch64,
+                                        org.eclipse.swt.cocoa.macosx.x86_64
+                                        org.eclipse.swt.cocoa.macosx.aarch64
+                                    </excludeArtifactIds>
+                                    <overWriteReleases>true</overWriteReleases>
+                                    <includeScope>runtime</includeScope>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>copy-platform-dependencies-to-dist</id>
+                                <goals>
+                                    <goal>copy</goal>
+                                </goals>
+                                <phase>package</phase>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>org.eclipse.platform</groupId>
+                                            <artifactId>org.eclipse.swt.win32.win32.x86_64</artifactId>
+                                            <outputDirectory>${distDirectory}/win-x86_64/lib</outputDirectory>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>org.eclipse.platform</groupId>
+                                            <artifactId>org.eclipse.swt.win32.win32.aarch64</artifactId>
+                                            <outputDirectory>${distDirectory}/win-aarch64/lib</outputDirectory>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>org.eclipse.platform</groupId>
+                                            <artifactId>org.eclipse.swt.gtk.linux.x86_64</artifactId>
+                                            <outputDirectory>${distDirectory}/linux-x86_64/lib</outputDirectory>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>org.eclipse.platform</groupId>
+                                            <artifactId>org.eclipse.swt.gtk.linux.aarch64</artifactId>
+                                            <outputDirectory>${distDirectory}/linux-aarch64/lib</outputDirectory>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>org.eclipse.platform</groupId>
+                                            <artifactId>org.eclipse.swt.cocoa.macosx.x86_64</artifactId>
+                                            <outputDirectory>${distDirectory}/mac-x86_64/lib</outputDirectory>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>org.eclipse.platform</groupId>
+                                            <artifactId>org.eclipse.swt.cocoa.macosx.aarch64</artifactId>
+                                            <outputDirectory>${distDirectory}/mac-aarch64/lib</outputDirectory>
+                                        </artifactItem>
+                                    </artifactItems>
+                                </configuration>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>
