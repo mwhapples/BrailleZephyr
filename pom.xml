@@ -65,6 +65,16 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.platform</groupId>
+                <artifactId>org.eclipse.swt.gtk.linux.riscv64</artifactId>
+                <version>${swt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.platform</groupId>
+                <artifactId>org.eclipse.swt.gtk.linux.ppc64le</artifactId>
+                <version>${swt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.platform</groupId>
                 <artifactId>org.eclipse.swt.cocoa.macosx.x86_64</artifactId>
                 <version>${swt.version}</version>
             </dependency>
@@ -203,6 +213,8 @@
                                         org.eclipse.swt.win32.win32.aarch64,
                                         org.eclipse.swt.gtk.linux.x86_64,
                                         org.eclipse.swt.gtk.linux.aarch64,
+                                        org.eclipse.swt.gtk.linux.riscv64,
+                                        org.eclipse.swt.gtk.linux.ppc64le,
                                         org.eclipse.swt.cocoa.macosx.x86_64
                                         org.eclipse.swt.cocoa.macosx.aarch64
                                     </excludeArtifactIds>
@@ -237,6 +249,16 @@
                                             <groupId>org.eclipse.platform</groupId>
                                             <artifactId>org.eclipse.swt.gtk.linux.aarch64</artifactId>
                                             <outputDirectory>${distDirectory}/linux-aarch64/lib</outputDirectory>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>org.eclipse.platform</groupId>
+                                            <artifactId>org.eclipse.swt.gtk.linux.riscv64</artifactId>
+                                            <outputDirectory>${distDirectory}/linux-riscv64/lib</outputDirectory>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>org.eclipse.platform</groupId>
+                                            <artifactId>org.eclipse.swt.gtk.linux.ppc64le</artifactId>
+                                            <outputDirectory>${distDirectory}/linux-ppc64le/lib</outputDirectory>
                                         </artifactItem>
                                         <artifactItem>
                                             <groupId>org.eclipse.platform</groupId>
