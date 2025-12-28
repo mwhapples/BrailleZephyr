@@ -50,16 +50,8 @@ public final class BZFile extends BZBase {
     }
 
     boolean newFile() {
-        //   check if text has been modified
-        if (bzStyledText.getModified()) {
-            MessageBox messageBox = new MessageBox(parentShell, SWT.ICON_QUESTION | SWT.YES | SWT.NO | SWT.CANCEL);
-            messageBox.setMessage("Would you like to save your changes?");
-            int result = messageBox.open();
-            if (result == SWT.CANCEL)
-                return false;
-            else if (result == SWT.YES)
-                if (!saveFile())
-                    return false;
+        if (closeCurrentDocument()) {
+            return false;
         }
 
         bzStyledText.setText("");
@@ -90,16 +82,8 @@ public final class BZFile extends BZBase {
     }
 
     boolean openFile() {
-        //   check if text has been modified
-        if (bzStyledText.getModified()) {
-            MessageBox messageBox = new MessageBox(parentShell, SWT.ICON_QUESTION | SWT.YES | SWT.NO | SWT.CANCEL);
-            messageBox.setMessage("Would you like to save your changes?");
-            int result = messageBox.open();
-            if (result == SWT.CANCEL)
-                return false;
-            else if (result == SWT.YES)
-                if (!saveFile())
-                    return false;
+        if (closeCurrentDocument()) {
+            return false;
         }
 
         FileDialog fileDialog = new FileDialog(parentShell, SWT.OPEN);
@@ -111,6 +95,21 @@ public final class BZFile extends BZBase {
             return false;
 
         return openFile(Path.of(fileName));
+    }
+
+    private boolean closeCurrentDocument() {
+        //   check if text has been modified
+        if (bzStyledText.getModified()) {
+            MessageBox messageBox = new MessageBox(parentShell, SWT.ICON_QUESTION | SWT.YES | SWT.NO | SWT.CANCEL);
+            messageBox.setMessage("Would you like to save your changes?");
+            int result = messageBox.open();
+            if (result == SWT.CANCEL) {
+                return true;
+            } else if (result == SWT.YES) {
+                return !saveFile();
+            }
+        }
+        return false;
     }
 
     boolean saveFile() {
