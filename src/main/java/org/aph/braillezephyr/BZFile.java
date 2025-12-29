@@ -50,7 +50,7 @@ public final class BZFile extends BZBase {
     }
 
     boolean newFile() {
-        if (closeCurrentDocument()) {
+        if (!closeCurrentDocument()) {
             return false;
         }
 
@@ -82,7 +82,7 @@ public final class BZFile extends BZBase {
     }
 
     boolean openFile() {
-        if (closeCurrentDocument()) {
+        if (!closeCurrentDocument()) {
             return false;
         }
 
@@ -97,19 +97,19 @@ public final class BZFile extends BZBase {
         return openFile(Path.of(fileName));
     }
 
-    private boolean closeCurrentDocument() {
+    public boolean closeCurrentDocument() {
         //   check if text has been modified
         if (bzStyledText.getModified()) {
             MessageBox messageBox = new MessageBox(parentShell, SWT.ICON_QUESTION | SWT.YES | SWT.NO | SWT.CANCEL);
             messageBox.setMessage("Would you like to save your changes?");
             int result = messageBox.open();
             if (result == SWT.CANCEL) {
-                return true;
+                return false;
             } else if (result == SWT.YES) {
-                return !saveFile();
+                return saveFile();
             }
         }
-        return false;
+        return true;
     }
 
     boolean saveFile() {

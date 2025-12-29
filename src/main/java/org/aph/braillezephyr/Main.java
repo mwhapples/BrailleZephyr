@@ -37,7 +37,6 @@ import java.nio.file.Path;
  */
 public final class Main {
     private final Shell shell;
-    private final BZStyledText bzStyledText;
     private final BZFile bzFile;
     private final BZSettings bzSettings;
 
@@ -59,7 +58,7 @@ public final class Main {
         shell.setText("BrailleZephyr");
         shell.addShellListener(new ShellHandler());
 
-        bzStyledText = new BZStyledText(shell);
+        final BZStyledText bzStyledText = new BZStyledText(shell);
         bzFile = new BZFile(bzStyledText);
         bzSettings = new BZSettings(bzStyledText);
         new BZMenu(bzStyledText, bzFile, bzSettings);
@@ -79,18 +78,8 @@ public final class Main {
     }
 
     private boolean checkClosing() {
-        boolean doit = true;
-
         //   check if text has been modified
-        if (bzStyledText.getModified()) {
-            MessageBox messageBox = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO | SWT.CANCEL);
-            messageBox.setMessage("Would you like to save your changes?");
-            int result = messageBox.open();
-            if (result == SWT.CANCEL)
-                doit = false;
-            else if (result == SWT.YES)
-                doit = bzFile.saveFile();
-        }
+        boolean doit = bzFile.closeCurrentDocument();
 
         //   write settings file
         if (doit) {
