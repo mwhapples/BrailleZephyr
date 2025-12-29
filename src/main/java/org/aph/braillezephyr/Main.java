@@ -21,8 +21,6 @@ import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.events.ShellListener;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 
@@ -51,7 +49,7 @@ public final class Main {
         Display display = Display.getDefault();
 
         //   needed to catch Quit (Command-Q) on Macs
-        display.addListener(SWT.Close, new CloseHandler());
+        display.addListener(SWT.Close, event -> event.doit = checkClosing());
 
         shell = new Shell(display);
         shell.setLayout(new FillLayout());
@@ -91,18 +89,6 @@ public final class Main {
         }
 
         return doit;
-    }
-
-    /**
-     * <p>
-     * Needed to catch Quit (Command-Q) on Macs
-     * </p>
-     */
-    private class CloseHandler implements Listener {
-        @Override
-        public void handleEvent(Event event) {
-            event.doit = checkClosing();
-        }
     }
 
     private class ShellHandler implements ShellListener {
