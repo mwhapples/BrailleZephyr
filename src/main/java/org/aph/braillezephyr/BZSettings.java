@@ -30,7 +30,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -45,7 +45,7 @@ public final class BZSettings extends BZBase {
     private final File file;
 
     private int recentFilesMax = 6;
-    private final List<String> recentFiles = new ArrayList<>(recentFilesMax);
+    private final List<String> recentFiles = new LinkedList<>();
 
     private Point shellSize;
     private boolean shellMaximized;
@@ -133,23 +133,20 @@ public final class BZSettings extends BZBase {
     }
 
     void removeRecentFile(String fileName) {
-        for (String recentFile : recentFiles)
-            if (recentFile.equals(fileName)) {
-                recentFiles.remove(recentFile);
-                return;
-            }
+        recentFiles.remove(fileName);
     }
 
     void addRecentFile(String fileName) {
         //   check for duplicates
         removeRecentFile(fileName);
 
-        // Trim first to prevent going over capacity and requiring list expansion.
-        if (recentFiles.size() >= recentFilesMax) {
-            recentFiles.subList(recentFilesMax - 1, recentFiles.size()).clear();
-        }
-
         recentFiles.addFirst(fileName);
+
+        // Trim to max size.
+        int excessRecentFiles = recentFiles.size() - recentFilesMax;
+        if (excessRecentFiles > 0) {
+            recentFiles.reversed().subList(0, excessRecentFiles).clear();
+        }
     }
 
     private boolean readLine(String line) {

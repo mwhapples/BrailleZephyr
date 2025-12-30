@@ -15,10 +15,8 @@
 
 package org.aph.braillezephyr;
 
-public class BZException extends Exception
-{
-	BZException(String message)
-	{
-		super(message);
-	}
+public class BZException extends Exception {
+    BZException(String message) {
+        super(message);
+    }
 }
