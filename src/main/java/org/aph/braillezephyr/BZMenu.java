@@ -96,25 +96,7 @@ public final class BZMenu extends BZBase {
         });
 
         if (bzSettings != null) {
-            Menu recentFilesMenu = new Menu(menu);
-            recentFilesMenu.addListener(SWT.Show, event -> {
-                Menu m = (Menu)event.widget;
-                MenuItem[] items = m.getItems();
-                for (MenuItem i : items) {
-                    i.dispose();
-                }
-                List<String> recentFiles = bzSettings.getRecentFiles();
-                for (String fileName : recentFiles) {
-                    addMenuItemTo(m, fileName, e -> {
-                        if (bzFile.openFile(Path.of(fileName))) {
-                            bzSettings.addRecentFile(fileName);
-                        } else {
-                            bzSettings.removeRecentFile(fileName);
-                        }
-                    });
-                }
-            });
-
+            Menu recentFilesMenu = createRecentFilesMenu(bzFile, bzSettings, menu);
             addSubMenuItemTo(menu, "Open Recent", recentFilesMenu);
         }
 
@@ -248,17 +230,26 @@ public final class BZMenu extends BZBase {
         addMenuItemTo(menu, "View Log", e -> new LogViewerDialog(parentShell));
     }
 
-    /**
-     * <p>
-     * Creates a new <code>BZMenu</code> object.
-     * </p>
-     *
-     * @param bzStyledText the bzStyledText object to operate on (cannot be null)
-     * @param bzFile       the bzFile object for file operations (cannot be null)
-     * @see #BZMenu(BZStyledText, BZFile, BZSettings)
-     */
-    public BZMenu(BZStyledText bzStyledText, BZFile bzFile) {
-        this(bzStyledText, bzFile, null);
+    private static Menu createRecentFilesMenu(BZFile bzFile, BZSettings bzSettings, Menu menu) {
+        Menu recentFilesMenu = new Menu(menu);
+        recentFilesMenu.addListener(SWT.Show, event -> {
+            Menu m = (Menu)event.widget;
+            MenuItem[] items = m.getItems();
+            for (MenuItem i : items) {
+                i.dispose();
+            }
+            List<String> recentFiles = bzSettings.getRecentFiles();
+            for (String fileName : recentFiles) {
+                addMenuItemTo(m, fileName, e -> {
+                    if (bzFile.openFile(Path.of(fileName))) {
+                        bzSettings.addRecentFile(fileName);
+                    } else {
+                        bzSettings.removeRecentFile(fileName);
+                    }
+                });
+            }
+        });
+        return recentFilesMenu;
     }
 
     private void addRecentFile(String fileName) {

@@ -86,20 +86,6 @@ public final class BZSettings extends BZBase {
 
     /**
      * <p>
-     * Creates a new <code>BZSettings</code> object with the default
-     * <code>fileName</code>.
-     * </p>
-     *
-     * @param bzStyledText the bzStyledText to operate on (cannot be null)
-     * @param useSize      whether or not to resize the parent of bzStyledText
-     * @see #BZSettings(BZStyledText, String, boolean)
-     */
-    public BZSettings(BZStyledText bzStyledText, boolean useSize) {
-        this(bzStyledText, null, useSize);
-    }
-
-    /**
-     * <p>
      * Creates a new <code>BZSettings</code> object with resizing.
      * </p>
      *
@@ -126,10 +112,6 @@ public final class BZSettings extends BZBase {
 
     List<String> getRecentFiles() {
         return recentFiles;
-    }
-
-    int getRecentFilesMax() {
-        return recentFilesMax;
     }
 
     void removeRecentFile(String fileName) {
