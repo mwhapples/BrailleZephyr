@@ -18,6 +18,7 @@ package org.aph.braillezephyr;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.MessageBox;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.io.*;
@@ -61,7 +62,7 @@ public final class BZFile extends BZBase {
         return true;
     }
 
-    boolean openFile(Path path) {
+    boolean openFile(@NonNull Path path) {
         try (BufferedReader fileReader = Files.newBufferedReader(path)) {
             if (path.toString().endsWith("bzy")) {
                 bzStyledText.readBZY(fileReader);
