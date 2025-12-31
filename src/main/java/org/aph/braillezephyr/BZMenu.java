@@ -1,4 +1,5 @@
-/* Copyright (C) 2015 American Printing House for the Blind Inc.
+/* Copyright (C) 2025 Michael Whapples.
+ * Copyright (C) 2015 American Printing House for the Blind Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +40,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * <p>
@@ -92,8 +94,12 @@ public final class BZMenu extends BZBase {
         item.setText("&File");
         item.setMenu(menu);
 
-        new NewHandler().addMenuItemTo(menu, "&New");
-        new OpenHandler().addMenuItemTo(menu, "&Open\t" + mod1KeyName + "O", SWT.MOD1 | 'o');
+        addMenuItemTo(menu, "&New", e -> bzFile.newFile());
+        addMenuItemTo(menu, "&Open\t" + mod1KeyName + "O", SWT.MOD1 | 'o', e -> {
+            if (bzFile.openFile()) {
+                addRecentFile(bzFile.getFileName());
+            }
+        });
 
         if (bzSettings != null) {
             recentFilesMenu = new Menu(menu);
@@ -103,13 +109,68 @@ public final class BZMenu extends BZBase {
             new BaseAction().addSubMenuItemTo(menu, "Open Recent", recentFilesMenu);
         }
 
-        new SaveHandler().addMenuItemTo(menu, "&Save\t" + mod1KeyName + "S", SWT.MOD1 | 's');
-        new SaveAsHandler().addMenuItemTo(menu, "Save As\t" + mod2KeyName + mod1KeyName + "O", SWT.MOD1 | SWT.MOD2 | 's');
-        new QuitHandler().addMenuItemTo(menu, "Quit\t" + mod1KeyName + "Q", SWT.MOD1 | 'q');
+        addMenuItemTo(menu, "&Save\t" + mod1KeyName + "S", SWT.MOD1 | 's', e -> bzFile.saveFile());
+        addMenuItemTo(menu, "Save As\t" + mod2KeyName + mod1KeyName + "O", SWT.MOD1 | SWT.MOD2 | 's', e -> {
+            if (bzFile.saveAsFile()) {
+                addRecentFile(bzFile.getFileName());
+            }
+        });
+        addMenuItemTo(menu, "Quit\t" + mod1KeyName + "Q", SWT.MOD1 | 'q', e -> parentShell.close());
         new MenuItem(menu, SWT.SEPARATOR);
-        new LoadLineMarginBellHandler().addMenuItemTo(menu, "Load Line Margin Bell");
-        new LoadPageMarginBellHandler().addMenuItemTo(menu, "Load Page Margin Bell");
-        new LoadLineEndBellHandler().addMenuItemTo(menu, "Load Line End Bell");
+        addMenuItemTo(menu, "Load Line Margin Bell", e -> {
+            FileDialog fileDialog = new FileDialog(parentShell, SWT.OPEN);
+            fileDialog.setFileName(bzStyledText.getLineMarginFileName());
+            String fileName = fileDialog.open();
+            if (fileName == null)
+                return;
+            try {
+                bzStyledText.loadLineMarginFileName(fileName);
+            } catch (FileNotFoundException exception) {
+                logError("Unable to open file", exception);
+            } catch (IOException exception) {
+                logError("Unable to read file", exception);
+            } catch (UnsupportedAudioFileException ignore) {
+                logError("Sound file unsupported for line margin bell", fileName);
+            } catch (LineUnavailableException ignore) {
+                logError("Line unavailable for line margin bell", fileName);
+            }
+        });
+        addMenuItemTo(menu, "Load Page Margin Bell", e -> {
+            FileDialog fileDialog = new FileDialog(parentShell, SWT.OPEN);
+            fileDialog.setFileName(bzStyledText.getPageMarginFileName());
+            String fileName = fileDialog.open();
+            if (fileName == null)
+                return;
+            try {
+                bzStyledText.loadPageMarginFileName(fileName);
+            } catch (FileNotFoundException exception) {
+                logError("Unable to open file", exception);
+            } catch (IOException exception) {
+                logError("Unable to read file", exception);
+            } catch (UnsupportedAudioFileException ignore) {
+                logError("Sound file unsupported for page margin bell", fileName);
+            } catch (LineUnavailableException ignore) {
+                logError("Line unavailable for page margin bell", fileName);
+            }
+        });
+        addMenuItemTo(menu, "Load Line End Bell", e -> {
+            FileDialog fileDialog = new FileDialog(parentShell, SWT.OPEN);
+            fileDialog.setFileName(bzStyledText.getLineEndFileName());
+            String fileName = fileDialog.open();
+            if (fileName == null)
+                return;
+            try {
+                bzStyledText.loadLineEndFileName(fileName);
+            } catch (FileNotFoundException exception) {
+                logError("Unable to open file", exception);
+            } catch (IOException exception) {
+                logError("Unable to read file", exception);
+            } catch (UnsupportedAudioFileException ignore) {
+                logError("Sound file unsupported for page margin bell", fileName);
+            } catch (LineUnavailableException ignore) {
+                logError("Line unavailable for line end bell", fileName);
+            }
+        });
 
         //   edit menu
         menu = new Menu(menuBar);
@@ -118,12 +179,12 @@ public final class BZMenu extends BZBase {
         item.setMenu(menu);
 
         //   cut, copy, and paste accelerators are handled by StyledText.
-        new CutHandler().addMenuItemTo(menu, "Cut\t" + mod1KeyName + "X");
-        new CopyHandler().addMenuItemTo(menu, "Copy\t" + mod1KeyName + "C");
-        new PasteHandler().addMenuItemTo(menu, "Paste\t" + mod1KeyName + "V");
+        addMenuItemTo(menu, "Cut\t" + mod1KeyName + "X", e -> bzStyledText.cut());
+        addMenuItemTo(menu, "Copy\t" + mod1KeyName + "C", e -> bzStyledText.copy());
+        addMenuItemTo(menu, "Paste\t" + mod1KeyName + "V", e -> bzStyledText.paste());
         new MenuItem(menu, SWT.SEPARATOR);
-        new UndoHandler().addMenuItemTo(menu, "Undo\t" + mod1KeyName + "Z", SWT.MOD1 | 'z');
-        new RedoHandler().addMenuItemTo(menu, "Redo\t" + mod2KeyName + mod1KeyName + "Z", SWT.MOD1 | SWT.MOD2 | 'z');
+        addMenuItemTo(menu, "Undo\t" + mod1KeyName + "Z", SWT.MOD1 | 'z', e -> bzStyledText.undo());
+        addMenuItemTo(menu, "Redo\t" + mod2KeyName + mod1KeyName + "Z", SWT.MOD1 | SWT.MOD2 | 'z', e -> bzStyledText.redo());
 
         //   view menu
         menu = new Menu(menuBar);
@@ -132,8 +193,22 @@ public final class BZMenu extends BZBase {
         item.setMenu(menu);
 
         new VisibleHandler(menu);
-        new BrailleFontHandler().addMenuItemTo(menu, "Braille Font");
-        new AsciiFontHandler().addMenuItemTo(menu, "ASCII Font");
+        addMenuItemTo(menu, "Braille Font", e -> {
+            FontDialog fontDialog = new FontDialog(parentShell, SWT.OPEN);
+            fontDialog.setFontList(bzStyledText.getBrailleFont().getFontData());
+            FontData fontData = fontDialog.open();
+            if (fontData == null)
+                return;
+            bzStyledText.setBrailleFont(new Font(parentShell.getDisplay(), fontData));
+        });
+        addMenuItemTo(menu, "ASCII Font", e -> {
+            FontDialog fontDialog = new FontDialog(parentShell, SWT.OPEN);
+            fontDialog.setFontList(bzStyledText.getAsciiFont().getFontData());
+            FontData fontData = fontDialog.open();
+            if (fontData == null)
+                return;
+            bzStyledText.setAsciiFont(new Font(parentShell.getDisplay(), fontData));
+        });
 
         //   format menu
         menu = new Menu(menuBar);
@@ -141,11 +216,17 @@ public final class BZMenu extends BZBase {
         item.setText("F&ormat");
         item.setMenu(menu);
 
-        new LinesPerPageHandler(parentShell).addMenuItemTo(menu, "Lines Per Page");
-        new CharsPerLineHandler(parentShell).addMenuItemTo(menu, "Chars Per Line");
-        new LineMarginBellHandler(parentShell).addMenuItemTo(menu, "Line Margin Bell", bzStyledText.getLineMarginBell() != -1);
-        new PageMarginBellHandler(parentShell).addMenuItemTo(menu, "Page Margin Bell", bzStyledText.getPageMarginBell() != -1);
-        new RewrapFromCursorHandler().addMenuItemTo(menu, "Rewrap From Cursor\t" + mod1KeyName + "F", SWT.MOD1 | 'F');
+        addMenuItemTo(menu, "Lines Per Page", e -> new SpinnerDialog(parentShell, "Lines per Page", bzStyledText.getLinesPerPage(), 0, 255, i -> {
+            bzStyledText.setLinesPerPage(i);
+            bzStyledText.redraw();
+        }));
+        addMenuItemTo(menu, "Chars Per Line", e -> new SpinnerDialog(parentShell, "Characters Per Line", bzStyledText.getCharsPerLine(), 0, 27720, i -> {
+            bzStyledText.setCharsPerLine(i);
+            bzStyledText.redraw();
+        }));
+        addMenuItemTo(menu, "Line Margin Bell", bzStyledText.getLineMarginBell() != -1, e -> new SpinnerDialog(parentShell, "Bell Margin", bzStyledText.getLineMarginBell(), 0, 27720, bzStyledText::setLineMarginBell));
+        addMenuItemTo(menu, "Page Margin Bell", bzStyledText.getPageMarginBell() != -1, e -> new SpinnerDialog(parentShell, "Bell Page", bzStyledText.getPageMarginBell(), 0, 27720, bzStyledText::setPageMarginBell));
+        addMenuItemTo(menu, "Rewrap From Cursor\t" + mod1KeyName + "F", SWT.MOD1 | 'F', e -> bzStyledText.rewrapFromCaret());
 
         //   help menu
         menu = new Menu(menuBar);
@@ -153,9 +234,9 @@ public final class BZMenu extends BZBase {
         item.setText("&Help");
         item.setMenu(menu);
 
-        new AboutHandler(parentShell).addMenuItemTo(menu, "About");
+        addMenuItemTo(menu, "About", e -> new AboutDialog(parentShell));
         //TODO:  hide on non-development version
-        new LogViewerHandler(parentShell).addMenuItemTo(menu, "View Log");
+        addMenuItemTo(menu, "View Log", e -> new LogViewerDialog(parentShell));
     }
 
     /**
@@ -190,21 +271,6 @@ public final class BZMenu extends BZBase {
             recentFilesMenu.getItem(recentFilesMenu.getItemCount() - 1).dispose();
     }
 
-    private class NewHandler extends BaseAction {
-        @Override
-        public void widgetSelected(SelectionEvent ignored) {
-            bzFile.newFile();
-        }
-    }
-
-    private class OpenHandler extends BaseAction {
-        @Override
-        public void widgetSelected(SelectionEvent ignored) {
-            if (bzFile.openFile())
-                addRecentFile(bzFile.getFileName());
-        }
-    }
-
     private class OpenRecentHandler extends BaseAction {
         @Override
         public void widgetSelected(SelectionEvent event) {
@@ -217,129 +283,6 @@ public final class BZMenu extends BZBase {
                 bzSettings.removeRecentFile(fileName);
 
             menuItem.dispose();
-        }
-    }
-
-    private class SaveHandler extends BaseAction {
-        @Override
-        public void widgetSelected(SelectionEvent ignored) {
-            bzFile.saveFile();
-        }
-    }
-
-    private class SaveAsHandler extends BaseAction {
-        @Override
-        public void widgetSelected(SelectionEvent ignored) {
-            if (bzFile.saveAsFile())
-                addRecentFile(bzFile.getFileName());
-        }
-    }
-
-    private class QuitHandler extends BaseAction {
-        @Override
-        public void widgetSelected(SelectionEvent ignored) {
-            parentShell.close();
-        }
-    }
-
-    private class LoadLineMarginBellHandler extends BaseAction {
-        @Override
-        public void widgetSelected(SelectionEvent ignored) {
-            FileDialog fileDialog = new FileDialog(parentShell, SWT.OPEN);
-            fileDialog.setFileName(bzStyledText.getLineMarginFileName());
-            String fileName = fileDialog.open();
-            if (fileName == null)
-                return;
-            try {
-                bzStyledText.loadLineMarginFileName(fileName);
-            } catch (FileNotFoundException exception) {
-                logError("Unable to open file", exception);
-            } catch (IOException exception) {
-                logError("Unable to read file", exception);
-            } catch (UnsupportedAudioFileException ignore) {
-                logError("Sound file unsupported for line margin bell", fileName);
-            } catch (LineUnavailableException ignore) {
-                logError("Line unavailable for line margin bell", fileName);
-            }
-        }
-    }
-
-    private class LoadPageMarginBellHandler extends BaseAction {
-        @Override
-        public void widgetSelected(SelectionEvent ignored) {
-            FileDialog fileDialog = new FileDialog(parentShell, SWT.OPEN);
-            fileDialog.setFileName(bzStyledText.getPageMarginFileName());
-            String fileName = fileDialog.open();
-            if (fileName == null)
-                return;
-            try {
-                bzStyledText.loadPageMarginFileName(fileName);
-            } catch (FileNotFoundException exception) {
-                logError("Unable to open file", exception);
-            } catch (IOException exception) {
-                logError("Unable to read file", exception);
-            } catch (UnsupportedAudioFileException ignore) {
-                logError("Sound file unsupported for page margin bell", fileName);
-            } catch (LineUnavailableException ignore) {
-                logError("Line unavailable for page margin bell", fileName);
-            }
-        }
-    }
-
-    private class LoadLineEndBellHandler extends BaseAction {
-        @Override
-        public void widgetSelected(SelectionEvent ignored) {
-            FileDialog fileDialog = new FileDialog(parentShell, SWT.OPEN);
-            fileDialog.setFileName(bzStyledText.getLineEndFileName());
-            String fileName = fileDialog.open();
-            if (fileName == null)
-                return;
-            try {
-                bzStyledText.loadLineEndFileName(fileName);
-            } catch (FileNotFoundException exception) {
-                logError("Unable to open file", exception);
-            } catch (IOException exception) {
-                logError("Unable to read file", exception);
-            } catch (UnsupportedAudioFileException ignore) {
-                logError("Sound file unsupported for page margin bell", fileName);
-            } catch (LineUnavailableException ignore) {
-                logError("Line unavailable for line end bell", fileName);
-            }
-        }
-    }
-
-    private class CutHandler extends BaseAction {
-        @Override
-        public void widgetSelected(SelectionEvent ignored) {
-            bzStyledText.cut();
-        }
-    }
-
-    private class CopyHandler extends BaseAction {
-        @Override
-        public void widgetSelected(SelectionEvent ignored) {
-            bzStyledText.copy();
-        }
-    }
-
-    private class PasteHandler extends BaseAction {
-        @Override
-        public void widgetSelected(SelectionEvent ignored) {
-            bzStyledText.paste();
-        }
-    }
-
-    private class UndoHandler extends BaseAction {
-        @Override
-        public void widgetSelected(SelectionEvent ignored) {
-            bzStyledText.undo();
-        }
-    }
-
-    private class RedoHandler extends BaseAction {
-        @Override
-        public void widgetSelected(SelectionEvent ignored) {
-            bzStyledText.redo();
         }
     }
 
@@ -385,108 +328,6 @@ public final class BZMenu extends BZBase {
         }
     }
 
-    private class BrailleFontHandler extends BaseAction {
-        @Override
-        public void widgetSelected(SelectionEvent ignored) {
-            FontDialog fontDialog = new FontDialog(parentShell, SWT.OPEN);
-            fontDialog.setFontList(bzStyledText.getBrailleFont().getFontData());
-            FontData fontData = fontDialog.open();
-            if (fontData == null)
-                return;
-            bzStyledText.setBrailleFont(new Font(parentShell.getDisplay(), fontData));
-        }
-    }
-
-    private class AsciiFontHandler extends BaseAction {
-        @Override
-        public void widgetSelected(SelectionEvent ignored) {
-            FontDialog fontDialog = new FontDialog(parentShell, SWT.OPEN);
-            fontDialog.setFontList(bzStyledText.getAsciiFont().getFontData());
-            FontData fontData = fontDialog.open();
-            if (fontData == null)
-                return;
-            bzStyledText.setAsciiFont(new Font(parentShell.getDisplay(), fontData));
-        }
-    }
-
-    private final class LinesPerPageHandler extends BaseAction {
-        private final Shell parentShell;
-
-        private LinesPerPageHandler(Shell parentShell) {
-            this.parentShell = parentShell;
-        }
-
-        @Override
-        public void widgetSelected(SelectionEvent ignored) {
-            new SpinnerDialog(parentShell, "Lines per Page", bzStyledText.getLinesPerPage(), 0, 255, i -> {
-                bzStyledText.setLinesPerPage(i);
-                bzStyledText.redraw();
-            });
-        }
-    }
-
-    private final class CharsPerLineHandler extends BaseAction {
-        private final Shell parentShell;
-
-        private CharsPerLineHandler(Shell parentShell) {
-            this.parentShell = parentShell;
-        }
-
-        @Override
-        public void widgetSelected(SelectionEvent ignored) {
-            new SpinnerDialog(parentShell, "Characters Per Line", bzStyledText.getCharsPerLine(), 0, 27720, i -> {
-                bzStyledText.setCharsPerLine(i);
-                bzStyledText.redraw();
-            });
-        }
-    }
-
-    private final class LineMarginBellHandler extends BaseAction {
-        private final Shell parentShell;
-
-        private LineMarginBellHandler(Shell parentShell) {
-            this.parentShell = parentShell;
-        }
-
-        @Override
-        public void widgetSelected(SelectionEvent ignored) {
-            new SpinnerDialog(parentShell, "Bell Margin", bzStyledText.getLineMarginBell(), 0, 27720, bzStyledText::setLineMarginBell);
-        }
-    }
-
-    private final class PageMarginBellHandler extends BaseAction {
-        private final Shell parentShell;
-
-        private PageMarginBellHandler(Shell parentShell) {
-            this.parentShell = parentShell;
-        }
-
-        @Override
-        public void widgetSelected(SelectionEvent ignored) {
-            new SpinnerDialog(parentShell, "Bell Page", bzStyledText.getPageMarginBell(), 0, 27720, bzStyledText::setPageMarginBell);
-        }
-    }
-
-    private class RewrapFromCursorHandler extends BaseAction {
-        @Override
-        public void widgetSelected(SelectionEvent ignored) {
-            bzStyledText.rewrapFromCaret();
-        }
-    }
-
-    private final class AboutHandler extends BaseAction {
-        private final Shell parentShell;
-
-        private AboutHandler(Shell parentShell) {
-            this.parentShell = parentShell;
-        }
-
-        @Override
-        public void widgetSelected(SelectionEvent ignored) {
-            new AboutDialog(parentShell);
-        }
-    }
-
     private final class AboutDialog {
         private AboutDialog(Shell parentShell) {
             Shell dialog = new Shell(parentShell, SWT.DIALOG_TRIM | SWT.PRIMARY_MODAL);
@@ -527,19 +368,6 @@ public final class BZMenu extends BZBase {
             while (!dialog.isDisposed())
                 if (!dialog.getDisplay().readAndDispatch())
                     dialog.getDisplay().sleep();
-        }
-    }
-
-    private final class LogViewerHandler extends BaseAction {
-        private final Shell parentShell;
-
-        private LogViewerHandler(Shell parentShell) {
-            this.parentShell = parentShell;
-        }
-
-        @Override
-        public void widgetSelected(SelectionEvent ignored) {
-            new LogViewerDialog(parentShell);
         }
     }
 
@@ -636,5 +464,38 @@ public final class BZMenu extends BZBase {
         @Override
         public void widgetDefaultSelected(SelectionEvent ignored) {
         }
+    }
+
+    private static MenuItem addMenuItemTo(
+            Menu menu,
+            String tag,
+            int accelerator,
+            boolean enabled,
+            Consumer<SelectionEvent> onSelection
+    ) {
+        MenuItem item = new MenuItem(menu, SWT.PUSH);
+        item.setText(tag);
+        if (accelerator != 0)
+            item.setAccelerator(accelerator);
+        item.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                onSelection.accept(e);
+            }
+        });
+        item.setEnabled(enabled);
+        return item;
+    }
+
+    private static MenuItem addMenuItemTo(Menu menu, String tag, int accelerator, Consumer<SelectionEvent> onSelection) {
+        return addMenuItemTo(menu, tag, accelerator, true, onSelection);
+    }
+
+    private static MenuItem addMenuItemTo(Menu menu, String tag, boolean enabled, Consumer<SelectionEvent> onSelection) {
+        return addMenuItemTo(menu, tag, 0, enabled, onSelection);
+    }
+
+    private static MenuItem addMenuItemTo(Menu menu, String tag, Consumer<SelectionEvent> onSelection) {
+        return addMenuItemTo(menu, tag, 0, true, onSelection);
     }
 }
