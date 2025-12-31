@@ -31,6 +31,7 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -201,16 +202,16 @@ public final class BZMenu extends BZBase {
         item.setText("F&ormat");
         item.setMenu(menu);
 
-        addMenuItemTo(menu, "Lines Per Page", e -> new SpinnerDialog(parentShell, "Lines per Page", bzStyledText.getLinesPerPage(), 0, 255, i -> {
+        addMenuItemTo(menu, "Lines Per Page", e -> new SpinnerDialog(parentShell, "Lines per Page", bzStyledText.getLinesPerPage(), 1, 255, i -> {
             bzStyledText.setLinesPerPage(i);
             bzStyledText.redraw();
         }));
-        addMenuItemTo(menu, "Chars Per Line", e -> new SpinnerDialog(parentShell, "Characters Per Line", bzStyledText.getCharsPerLine(), 0, 27720, i -> {
+        addMenuItemTo(menu, "Chars Per Line", e -> new SpinnerDialog(parentShell, "Characters Per Line", bzStyledText.getCharsPerLine(), 1, 27720, i -> {
             bzStyledText.setCharsPerLine(i);
             bzStyledText.redraw();
         }));
-        addMenuItemTo(menu, "Line Margin Bell", bzStyledText.getLineMarginBell() != -1, e -> new SpinnerDialog(parentShell, "Bell Margin", bzStyledText.getLineMarginBell(), 0, 27720, bzStyledText::setLineMarginBell));
-        addMenuItemTo(menu, "Page Margin Bell", bzStyledText.getPageMarginBell() != -1, e -> new SpinnerDialog(parentShell, "Bell Page", bzStyledText.getPageMarginBell(), 0, 27720, bzStyledText::setPageMarginBell));
+        addMenuItemTo(menu, "Line Margin Bell", bzStyledText.getLineMarginBell() != -1, e -> new SpinnerDialog(parentShell, "Bell Margin", bzStyledText.getLineMarginBell(), 1, 27720, bzStyledText::setLineMarginBell));
+        addMenuItemTo(menu, "Page Margin Bell", bzStyledText.getPageMarginBell() != -1, e -> new SpinnerDialog(parentShell, "Bell Page", bzStyledText.getPageMarginBell(), 1, 27720, bzStyledText::setPageMarginBell));
         addMenuItemTo(menu, "Rewrap From Cursor\t" + mod1KeyName + "F", SWT.MOD1 | 'F', e -> bzStyledText.rewrapFromCaret());
 
         //   help menu
@@ -307,11 +308,15 @@ public final class BZMenu extends BZBase {
 
             Label label;
 
-            Image image = new Image(parentShell.getDisplay(), getClass().getResourceAsStream("/icons/BrailleZephyr-icon-128x128.png"));
-            label = new Label(dialog, SWT.CENTER);
-            label.setLayoutData(new GridData(GridData.FILL_BOTH));
-            label.setImage(image);
-
+            try (InputStream imageStream = getClass().getResourceAsStream("/icons/BrailleZephyr-icon-128x128.png")) {
+                Image image = new Image(parentShell.getDisplay(), imageStream);
+                label = new Label(dialog, SWT.CENTER);
+                label.setLayoutData(new GridData(GridData.FILL_BOTH));
+                label.setImage(image);
+            } catch (IOException e) {
+                logError("Unable to load icon", e);
+                throw new RuntimeException("Unable to load icon", e);
+            }
             new Label(dialog, SWT.SEPARATOR | SWT.HORIZONTAL).setLayoutData(new GridData(GridData.FILL_BOTH));
 
             label = new Label(dialog, SWT.CENTER);
