@@ -3,6 +3,7 @@ package org.aph.braillezephyr;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
+import org.jspecify.annotations.NonNull;
 
 /**
  * <p>
@@ -13,10 +14,10 @@ import org.eclipse.swt.widgets.Shell;
  * @author Mike Gray mgray@aph.org
  */
 public class BZBase {
-    protected final BZStyledText bzStyledText;
+    protected final @NonNull BZStyledText bzStyledText;
     protected final Shell parentShell;
 
-    public BZBase(BZStyledText bzStyledText) {
+    public BZBase(@NonNull BZStyledText bzStyledText) {
         this.bzStyledText = bzStyledText;
         parentShell = bzStyledText.getParentShell();
     }

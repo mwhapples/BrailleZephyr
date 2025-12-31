@@ -21,6 +21,8 @@ import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Point;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
@@ -42,10 +44,10 @@ import java.util.List;
  * @author Mike Gray mgray@aph.org
  */
 public final class BZSettings extends BZBase {
-    private final File file;
+    private final @NonNull File file;
 
     private int recentFilesMax = 6;
-    private final List<String> recentFiles = new LinkedList<>();
+    private final @NonNull List<@NonNull String> recentFiles = new LinkedList<>();
 
     private Point shellSize;
     private boolean shellMaximized;
@@ -67,18 +69,17 @@ public final class BZSettings extends BZBase {
      * @param fileName     the filename of the settings file
      * @param useSize      whether or not to resize the parent of bzStyledText
      */
-    public BZSettings(BZStyledText bzStyledText, String fileName, boolean useSize) {
+    public BZSettings(@NonNull BZStyledText bzStyledText, @Nullable String fileName, boolean useSize) {
         super(bzStyledText);
 
-        if (fileName == null)
-            fileName = System.getProperty("user.home") + File.separator + ".braillezephyr.conf";
-        file = new File(fileName);
+        file = fileName != null ? new File(fileName) : new File(System.getProperty("user.home"), ".braillezephyr.conf");
         readSettings();
 
         if (useSize) {
             parentShell.addControlListener(new ControlHandler());
-            if (shellSize == null)
+            if (shellSize == null) {
                 shellSize = new Point(640, 480);
+            }
             parentShell.setSize(shellSize);
             parentShell.setMaximized(shellMaximized);
         }
@@ -110,15 +111,15 @@ public final class BZSettings extends BZBase {
         this(bzStyledText, null);
     }
 
-    List<String> getRecentFiles() {
+    @NonNull List<String> getRecentFiles() {
         return recentFiles;
     }
 
-    void removeRecentFile(String fileName) {
+    void removeRecentFile(@NonNull String fileName) {
         recentFiles.remove(fileName);
     }
 
-    void addRecentFile(String fileName) {
+    void addRecentFile(@NonNull String fileName) {
         //   check for duplicates
         removeRecentFile(fileName);
 
