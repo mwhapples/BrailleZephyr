@@ -24,13 +24,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.FileDialog;
-import org.eclipse.swt.widgets.FontDialog;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.MenuItem;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.*;
 import org.jspecify.annotations.Nullable;
 
 import javax.sound.sampled.LineUnavailableException;
@@ -39,7 +33,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * <p>
@@ -367,31 +360,26 @@ public final class BZMenu extends BZBase {
             String tag,
             int accelerator,
             boolean enabled,
-            Consumer<SelectionEvent> onSelection
+            Listener onSelection
     ) {
         MenuItem item = new MenuItem(menu, SWT.PUSH);
         item.setText(tag);
         if (accelerator != 0)
             item.setAccelerator(accelerator);
-        item.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                onSelection.accept(e);
-            }
-        });
+        item.addListener(SWT.Selection, onSelection);
         item.setEnabled(enabled);
         return item;
     }
 
-    private static MenuItem addMenuItemTo(Menu menu, String tag, int accelerator, Consumer<SelectionEvent> onSelection) {
+    private static MenuItem addMenuItemTo(Menu menu, String tag, int accelerator, Listener onSelection) {
         return addMenuItemTo(menu, tag, accelerator, true, onSelection);
     }
 
-    private static MenuItem addMenuItemTo(Menu menu, String tag, boolean enabled, Consumer<SelectionEvent> onSelection) {
+    private static MenuItem addMenuItemTo(Menu menu, String tag, boolean enabled, Listener onSelection) {
         return addMenuItemTo(menu, tag, 0, enabled, onSelection);
     }
 
-    private static MenuItem addMenuItemTo(Menu menu, String tag, Consumer<SelectionEvent> onSelection) {
+    private static MenuItem addMenuItemTo(Menu menu, String tag, Listener onSelection) {
         return addMenuItemTo(menu, tag, 0, true, onSelection);
     }
 
