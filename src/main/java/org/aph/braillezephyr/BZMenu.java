@@ -17,9 +17,7 @@
 package org.aph.braillezephyr;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.events.*;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
@@ -50,10 +48,7 @@ import java.util.function.Consumer;
  * @author Mike Gray mgray@aph.org
  */
 public final class BZMenu extends BZBase {
-    private final BZFile bzFile;
     private final BZSettings bzSettings;
-
-    private Menu recentFilesMenu;
 
     /**
      * <p>
@@ -72,7 +67,6 @@ public final class BZMenu extends BZBase {
     public BZMenu(BZStyledText bzStyledText, BZFile bzFile, BZSettings bzSettings) {
         super(bzStyledText);
 
-        this.bzFile = bzFile;
         this.bzSettings = bzSettings;
 
         Menu menuBar = new Menu(parentShell, SWT.BAR);
@@ -102,11 +96,26 @@ public final class BZMenu extends BZBase {
         });
 
         if (bzSettings != null) {
-            recentFilesMenu = new Menu(menu);
-            List<String> recentFiles = bzSettings.getRecentFiles();
-            for (String fileName : recentFiles)
-                new OpenRecentHandler().addMenuItemTo(recentFilesMenu, fileName);
-            new BaseAction().addSubMenuItemTo(menu, "Open Recent", recentFilesMenu);
+            Menu recentFilesMenu = new Menu(menu);
+            recentFilesMenu.addListener(SWT.Show, event -> {
+                Menu m = (Menu)event.widget;
+                MenuItem[] items = m.getItems();
+                for (MenuItem i : items) {
+                    i.dispose();
+                }
+                List<String> recentFiles = bzSettings.getRecentFiles();
+                for (String fileName : recentFiles) {
+                    addMenuItemTo(m, fileName, e -> {
+                        if (bzFile.openFile(Path.of(fileName))) {
+                            bzSettings.addRecentFile(fileName);
+                        } else {
+                            bzSettings.removeRecentFile(fileName);
+                        }
+                    });
+                }
+            });
+
+            addSubMenuItemTo(menu, "Open Recent", recentFilesMenu);
         }
 
         addMenuItemTo(menu, "&Save\t" + mod1KeyName + "S", SWT.MOD1 | 's', e -> bzFile.saveFile());
@@ -253,36 +262,8 @@ public final class BZMenu extends BZBase {
     }
 
     private void addRecentFile(String fileName) {
-        if (bzSettings == null)
-            return;
-
-        bzSettings.addRecentFile(fileName);
-
-        MenuItem[] menuItems = recentFilesMenu.getItems();
-        for (MenuItem menuItem : menuItems) {
-            if (menuItem.getText().equals(fileName)) {
-                menuItem.dispose();
-                break;
-            }
-        }
-        new OpenRecentHandler().addMenuItemAt(recentFilesMenu, fileName, 0);
-
-        if (recentFilesMenu.getItemCount() > bzSettings.getRecentFilesMax())
-            recentFilesMenu.getItem(recentFilesMenu.getItemCount() - 1).dispose();
-    }
-
-    private class OpenRecentHandler extends BaseAction {
-        @Override
-        public void widgetSelected(SelectionEvent event) {
-            MenuItem menuItem = (MenuItem) event.widget;
-            String fileName = menuItem.getText();
-            if (bzFile.openFile(Path.of(fileName))) {
-                new OpenRecentHandler().addMenuItemAt(recentFilesMenu, fileName, 0);
-                bzSettings.addRecentFile(fileName);
-            } else
-                bzSettings.removeRecentFile(fileName);
-
-            menuItem.dispose();
+        if (bzSettings != null) {
+            bzSettings.addRecentFile(fileName);
         }
     }
 
@@ -389,83 +370,6 @@ public final class BZMenu extends BZBase {
         }
     }
 
-    private static class BaseAction implements SelectionListener {
-        MenuItem addMenuItemTo(Menu menu,
-                               String tag,
-                               int accelerator,
-                               boolean enabled) {
-            MenuItem item = new MenuItem(menu, SWT.PUSH);
-            item.setText(tag);
-            if (accelerator != 0)
-                item.setAccelerator(accelerator);
-            item.addSelectionListener(this);
-            item.setEnabled(enabled);
-            return item;
-        }
-
-        MenuItem addMenuItemTo(Menu menu, String tag, int accelerator) {
-            return addMenuItemTo(menu, tag, accelerator, true);
-        }
-
-        MenuItem addMenuItemTo(Menu menu, String tag, boolean enabled) {
-            return addMenuItemTo(menu, tag, 0, enabled);
-        }
-
-        MenuItem addMenuItemTo(Menu menu, String tag) {
-            return addMenuItemTo(menu, tag, 0, true);
-        }
-
-        MenuItem addMenuItemAt(Menu menu,
-                               String tag,
-                               int accelerator,
-                               boolean enabled,
-                               int index) {
-            MenuItem item = new MenuItem(menu, SWT.PUSH, index);
-            item.setText(tag);
-            if (accelerator != 0)
-                item.setAccelerator(accelerator);
-            item.addSelectionListener(this);
-            item.setEnabled(enabled);
-            return item;
-        }
-
-        MenuItem addMenuItemAt(Menu menu, String tag, int accelerator, int index) {
-            return addMenuItemAt(menu, tag, accelerator, true, index);
-        }
-
-        MenuItem addMenuItemAt(Menu menu, String tag, boolean enabled, int index) {
-            return addMenuItemAt(menu, tag, 0, enabled, index);
-        }
-
-        MenuItem addMenuItemAt(Menu menu, String tag, int index) {
-            return addMenuItemAt(menu, tag, 0, true, index);
-        }
-
-        MenuItem addSubMenuItemTo(Menu menu,
-                                  String tag,
-                                  boolean enabled,
-                                  Menu subMenu) {
-            MenuItem item = new MenuItem(menu, SWT.CASCADE);
-            item.setText(tag);
-            item.addSelectionListener(this);
-            item.setMenu(subMenu);
-            item.setEnabled(enabled);
-            return item;
-        }
-
-        MenuItem addSubMenuItemTo(Menu menu, String tag, Menu subMenu) {
-            return addSubMenuItemTo(menu, tag, true, subMenu);
-        }
-
-        @Override
-        public void widgetSelected(SelectionEvent ignored) {
-        }
-
-        @Override
-        public void widgetDefaultSelected(SelectionEvent ignored) {
-        }
-    }
-
     private static MenuItem addMenuItemTo(
             Menu menu,
             String tag,
@@ -497,5 +401,22 @@ public final class BZMenu extends BZBase {
 
     private static MenuItem addMenuItemTo(Menu menu, String tag, Consumer<SelectionEvent> onSelection) {
         return addMenuItemTo(menu, tag, 0, true, onSelection);
+    }
+
+    private static MenuItem addSubMenuItemTo(
+            Menu menu,
+            String tag,
+            boolean enabled,
+            Menu subMenu
+    ) {
+        MenuItem item = new MenuItem(menu, SWT.CASCADE);
+        item.setText(tag);
+        item.setMenu(subMenu);
+        item.setEnabled(enabled);
+        return item;
+    }
+
+    private static MenuItem addSubMenuItemTo(Menu menu, String tag, Menu subMenu) {
+        return addSubMenuItemTo(menu, tag, true, subMenu);
     }
 }
