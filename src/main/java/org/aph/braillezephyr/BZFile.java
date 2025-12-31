@@ -22,6 +22,7 @@ import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.io.*;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -63,7 +64,8 @@ public final class BZFile extends BZBase {
     }
 
     boolean openFile(@NonNull Path path) {
-        try (BufferedReader fileReader = Files.newBufferedReader(path)) {
+        Charset charset = path.toString().endsWith("bzy") ? StandardCharsets.UTF_8 : StandardCharsets.US_ASCII;
+        try (BufferedReader fileReader = Files.newBufferedReader(path, charset)) {
             if (path.toString().endsWith("bzy")) {
                 bzStyledText.readBZY(fileReader);
             } else {
@@ -146,21 +148,14 @@ public final class BZFile extends BZBase {
         } else
             fileName = this.fileName;
 
-        try {
-            OutputStreamWriter writer;
-
-            if (fileName.endsWith("brf")) {
-                writer = new OutputStreamWriter(new FileOutputStream(fileName), StandardCharsets.US_ASCII);
-                bzStyledText.writeBRF(writer);
-            } else if (fileName.endsWith("bzy")) {
-                writer = new OutputStreamWriter(new FileOutputStream(fileName));
+        Charset charset = fileName.endsWith("bzy") ? StandardCharsets.UTF_8 : StandardCharsets.US_ASCII;
+        try(BufferedWriter writer = Files.newBufferedWriter(Path.of(fileName), charset)) {
+            if (fileName.endsWith("bzy")) {
                 bzStyledText.writeBZY(writer);
             } else {
-                writer = new OutputStreamWriter(new FileOutputStream(fileName));
                 bzStyledText.writeBRF(writer);
             }
 
-            writer.close();
             parentShell.setText(new File(fileName).getName() + " - BrailleZephyr");
             this.fileName = fileName;
             return true;
