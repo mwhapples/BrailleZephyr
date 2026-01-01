@@ -222,7 +222,7 @@ public final class BZMenu extends BZBase {
 
         addMenuItemTo(menu, "About", e -> new AboutDialog(parentShell));
         //TODO:  hide on non-development version
-        addMenuItemTo(menu, "View Log", e -> new LogViewerDialog(parentShell));
+        addMenuItemTo(menu, "View Log", e -> showLogViewerDialog(parentShell));
     }
 
     private static Menu createRecentFilesMenu(BZFile bzFile, BZSettings bzSettings, Menu menu) {
@@ -339,19 +339,15 @@ public final class BZMenu extends BZBase {
         }
     }
 
-    private final class LogViewerDialog {
+    private void showLogViewerDialog(Shell parentShell) {
+        Shell dialog = new Shell(parentShell, SWT.DIALOG_TRIM | SWT.PRIMARY_MODAL);
+        dialog.setLayout(new FillLayout());
+        dialog.setText("Log Messages");
 
-        private LogViewerDialog(Shell parentShell) {
+        Text text = new Text(dialog, SWT.READ_ONLY | SWT.BORDER | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+        text.setText(bzStyledText.getLogString());
 
-            Shell dialog = new Shell(parentShell, SWT.DIALOG_TRIM | SWT.PRIMARY_MODAL);
-            dialog.setLayout(new FillLayout());
-            dialog.setText("Log Messages");
-
-            Text text = new Text(dialog, SWT.READ_ONLY | SWT.BORDER | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-            text.setText(bzStyledText.getLogString());
-
-            dialog.open();
-        }
+        dialog.open();
     }
 
     private static MenuItem addMenuItemTo(
