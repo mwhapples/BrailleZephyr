@@ -29,8 +29,10 @@ import org.jspecify.annotations.NonNull;
 
 import javax.sound.sampled.*;
 import java.io.*;
+import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -210,8 +212,12 @@ public class BZStyledText {
             if (fontInputStream == null) {
                 return;
             }
-            Path fontFile = Path.of(System.getProperty("java.io.tmpdir"), fontFileName);
-            Files.copy(fontInputStream, fontFile);
+            final int extIndex = fontFileName.lastIndexOf(".");
+            final String prefix = extIndex > 0? fontFileName.substring(0, extIndex) : null;
+            final String extension = extIndex >= 0? fontFileName.substring(extIndex) : null;
+            Path fontFile = Files.createTempFile(prefix, extension);
+            // Remember the createTempFile call created the file, so we must replace it.
+            Files.copy(fontInputStream, fontFile, StandardCopyOption.REPLACE_EXISTING);
             parentShell.getDisplay().loadFont(fontFile.toString());
         } catch (FileNotFoundException exception) {
             logWriter.println("ERROR:  Unable to open font file:  " + exception.getMessage());
