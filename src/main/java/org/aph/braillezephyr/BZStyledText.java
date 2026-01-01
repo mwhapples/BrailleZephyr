@@ -206,20 +206,13 @@ public class BZStyledText {
     }
 
     private void loadFont(String fontFileName) {
-        try {
-            InputStream fontInputStream = getClass().getResourceAsStream("/fonts/" + fontFileName);
-            if (fontInputStream == null)
+        try (InputStream fontInputStream = getClass().getResourceAsStream("/fonts/" + fontFileName)) {
+            if (fontInputStream == null) {
                 return;
-            File fontFile = new File(System.getProperty("java.io.tmpdir") + File.separator + fontFileName);
-            FileOutputStream fontOutputStream = new FileOutputStream(fontFile);
-            byte[] buffer = new byte[27720];
-            int length;
-            while ((length = fontInputStream.read(buffer)) > 0)
-                fontOutputStream.write(buffer, 0, length);
-            fontInputStream.close();
-            fontOutputStream.close();
-
-            parentShell.getDisplay().loadFont(fontFile.getPath());
+            }
+            Path fontFile = Path.of(System.getProperty("java.io.tmpdir"), fontFileName);
+            Files.copy(fontInputStream, fontFile);
+            parentShell.getDisplay().loadFont(fontFile.toString());
         } catch (FileNotFoundException exception) {
             logWriter.println("ERROR:  Unable to open font file:  " + exception.getMessage());
         } catch (IOException exception) {
