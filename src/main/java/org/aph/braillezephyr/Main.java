@@ -18,6 +18,7 @@ package org.aph.braillezephyr;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
@@ -54,6 +55,14 @@ public final class Main {
         shell.setLayout(new FillLayout());
         shell.setText("BrailleZephyr");
         shell.addListener(SWT.Close, e -> e.doit = checkClosing());
+        shell.addListener(SWT.Show, (event -> {
+            MessageBox msgBox = new MessageBox(event.display.getActiveShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+            msgBox.setText("Visit BrailleZ website?");
+            msgBox.setMessage("BrailleZephyr is now deprecated and replaced by BrailleZ. Please install BrailleZ to continue getting updates. Do you want to go to the BrailleZ website?");
+            if (msgBox.open() == SWT.YES) {
+                Program.launch("https://mwhapples.github.io/BrailleZ");
+            }
+        }));
 
         final BZStyledText bzStyledText = new BZStyledText(shell);
         bzFile = new BZFile(bzStyledText);
