@@ -1,5 +1,11 @@
 # BrailleZephyr
 
+## Important Notice
+
+BrailleZephyr is now replaced by [BrailleZ](https://github.com/mwhapples/BrailleZ). It appears that working with upstream will not be possible and so a rebrand has been done to make this a distinct product separate from that of BrailleZephyr from American Printing House for the Blind. To continue getting updates, please install [BrailleZ](https://mwhapples.github.io/BrailleZ/download.html). Sorry for the inconvenience caused by this change but it was necessary.
+
+## Description
+
 BrailleZephyr is a simple Braille Ready File (BRF) editor
 * Runs on Windows, Mac or Linux.
 * Six key entry and display using the F D S and J K L keys.
